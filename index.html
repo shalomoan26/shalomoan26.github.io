@@ -1,0 +1,1280 @@
+<html class="scroll-smooth" lang="id">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   SHDK Diary - Aplikasi Catatan Multifungsi
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <style>
+   body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9fafb;
+  }
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #e5e7eb;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #4f46e5;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4338ca;
+  }
+  /* Emboss SH icon style */
+  .app-icon {
+    font-weight: 900;
+    font-size: 3rem;
+    color: #3b82f6;
+    text-shadow:
+      1px 1px 0 #dbeafe,
+      2px 2px 0 #bfdbfe,
+      3px 3px 0 #93c5fd,
+      4px 4px 0 #60a5fa,
+      5px 5px 0 #3b82f6;
+  }
+  /* Custom scrollbar for mobile */
+  @media (max-width: 640px) {
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+  }
+  </style>
+ </head>
+ <body class="flex flex-col min-h-screen bg-gray-50 text-gray-800">
+  <!-- PIN Lock Screen -->
+  <div class="fixed inset-0 bg-indigo-900 bg-opacity-95 flex flex-col items-center justify-center z-50 p-6 hidden" id="pin-lock-screen">
+   <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm text-center">
+    <h2 class="text-2xl font-extrabold text-indigo-900 mb-6">
+     Masukkan PIN Anda
+    </h2>
+    <input autocomplete="off" class="w-full text-center text-3xl font-mono border border-indigo-600 rounded-lg py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-600" id="pin-input" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" type="password"/>
+    <button class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition" id="pin-submit">
+     Buka Aplikasi
+    </button>
+    <p class="text-red-600 mt-3 hidden" id="pin-error">
+     PIN salah, coba lagi.
+    </p>
+   </div>
+  </div>
+  <!-- Main App Container -->
+  <div class="flex flex-col flex-grow max-w-5xl mx-auto w-full h-full" id="app">
+   <!-- Header with App Icon and Title -->
+   <header class="flex items-center justify-between bg-indigo-600 text-white px-6 py-4 shadow-md sticky top-0 z-40">
+    <div class="flex items-center space-x-3">
+     <div aria-label="Logo SHDK Diary" class="app-icon select-none">
+      SH
+     </div>
+     <h1 class="text-2xl font-extrabold tracking-wide select-none">
+      SHDK Diary
+     </h1>
+    </div>
+    <button aria-label="Buka Pengaturan" class="text-white hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 rounded" id="settings-btn">
+     <i class="fas fa-cog fa-lg">
+     </i>
+    </button>
+   </header>
+   <!-- Navigation Tabs -->
+   <nav class="bg-white shadow-sm flex justify-around border-b border-gray-200 sticky top-[64px] z-30">
+    <button aria-current="page" aria-label="Beranda" class="tab-btn flex flex-col items-center justify-center py-3 px-4 w-full text-indigo-600 border-b-4 border-indigo-600 font-semibold focus:outline-none" data-tab="home">
+     <i class="fas fa-home fa-lg mb-1">
+     </i>
+     Beranda
+    </button>
+    <button aria-label="Tulis Catatan" class="tab-btn flex flex-col items-center justify-center py-3 px-4 w-full text-gray-600 hover:text-indigo-600 focus:outline-none" data-tab="write">
+     <i class="fas fa-pencil-alt fa-lg mb-1">
+     </i>
+     Tulis Catatan
+    </button>
+    <button aria-label="Pustaka" class="tab-btn flex flex-col items-center justify-center py-3 px-4 w-full text-gray-600 hover:text-indigo-600 focus:outline-none" data-tab="library">
+     <i class="fas fa-book fa-lg mb-1">
+     </i>
+     Pustaka
+    </button>
+    <button aria-label="Quotes" class="tab-btn flex flex-col items-center justify-center py-3 px-4 w-full text-gray-600 hover:text-indigo-600 focus:outline-none" data-tab="quotes">
+     <i class="fas fa-lightbulb fa-lg mb-1">
+     </i>
+     Quotes
+    </button>
+    <button aria-label="Profil Pengguna" class="tab-btn flex flex-col items-center justify-center py-3 px-4 w-full text-gray-600 hover:text-indigo-600 focus:outline-none" data-tab="profile">
+     <i class="fas fa-user fa-lg mb-1">
+     </i>
+     Profil
+    </button>
+   </nav>
+   <!-- Content Sections -->
+   <main class="flex-grow overflow-auto bg-gray-50 p-6">
+    <!-- Home Tab -->
+    <section aria-label="Beranda" class="tab-content" id="tab-home" role="tabpanel" tabindex="0">
+     <div class="max-w-3xl mx-auto space-y-10">
+      <!-- Latest Note Preview -->
+      <div class="bg-white rounded-xl shadow-md p-6">
+       <h2 class="text-xl font-extrabold text-indigo-700 mb-2">
+        Catatan Terbaru
+       </h2>
+       <div class="border border-gray-300 rounded-lg p-4 bg-indigo-50 select-text" id="latest-note">
+        <h3 class="text-lg font-semibold text-indigo-900 mb-1 truncate" id="latest-note-title">
+        </h3>
+        <p class="text-gray-700 whitespace-pre-wrap max-h-40 overflow-y-auto mb-3" id="latest-note-content">
+        </p>
+        <time class="text-sm text-gray-500" id="latest-note-date">
+        </time>
+       </div>
+       <p class="mt-2 text-sm text-gray-600 italic">
+        Catatan ini hanya dapat dilihat di sini. Untuk mengedit, buka menu Pustaka.
+       </p>
+      </div>
+      <!-- Daily Quote -->
+      <div class="bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center">
+       <h2 class="text-xl font-extrabold text-indigo-700 mb-4">
+        Quotes Harian
+       </h2>
+       <blockquote class="text-2xl italic text-indigo-900 mb-4 min-h-[80px] px-4" id="daily-quote-text">
+       </blockquote>
+       <footer class="text-indigo-700 font-semibold" id="daily-quote-author">
+       </footer>
+      </div>
+     </div>
+    </section>
+    <!-- Write Note Tab -->
+    <section aria-label="Tulis Catatan" class="tab-content hidden" id="tab-write" role="tabpanel" tabindex="0">
+     <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6 flex flex-col space-y-6">
+      <h2 class="text-xl font-extrabold text-indigo-700">
+       Tulis Catatan Baru
+      </h2>
+      <form autocomplete="off" class="flex flex-col space-y-4" id="note-form" novalidate="">
+       <label class="font-semibold text-gray-700" for="note-title">
+        Judul Catatan
+       </label>
+       <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="note-title" maxlength="100" name="title" placeholder="Judul catatan..." required="" type="text"/>
+       <label class="font-semibold text-gray-700" for="note-content">
+        Isi Catatan
+       </label>
+       <textarea class="border border-gray-300 rounded-lg px-4 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500" id="note-content" name="content" placeholder="Tulis catatan Anda di sini..." required="" rows="8"></textarea>
+       <label class="font-semibold text-gray-700" for="note-tags">
+        Tag (pisahkan dengan koma)
+       </label>
+       <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="note-tags" name="tags" placeholder="misal: kerja, pribadi, ide" type="text"/>
+       <div class="flex justify-between items-center">
+        <button class="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition" type="submit">
+         Simpan Catatan
+        </button>
+        <p class="text-sm text-green-600 font-semibold hidden select-none" id="auto-save-msg">
+         Catatan tersimpan otomatis
+        </p>
+       </div>
+      </form>
+     </div>
+    </section>
+    <!-- Library Tab -->
+    <section aria-label="Pustaka Catatan" class="tab-content hidden" id="tab-library" role="tabpanel" tabindex="0">
+     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6 flex flex-col space-y-6">
+      <h2 class="text-xl font-extrabold text-indigo-700">
+       Pustaka Catatan
+      </h2>
+      <div class="flex flex-col md:flex-row md:space-x-6">
+       <div class="md:w-1/3 mb-4 md:mb-0">
+        <input aria-label="Cari catatan" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="search-notes" placeholder="Cari catatan..." type="search"/>
+        <div aria-label="Daftar catatan" class="mt-6 space-y-4 max-h-[480px] overflow-y-auto" id="notes-list" role="list">
+         <!-- Notes list items inserted here dynamically -->
+        </div>
+       </div>
+       <div class="md:w-2/3 border-l border-gray-200 pl-6">
+        <div class="select-text" id="note-detail">
+         <h3 class="text-2xl font-bold text-indigo-900 mb-2 truncate" id="note-detail-title">
+         </h3>
+         <time class="text-sm text-gray-500 mb-4 block" id="note-detail-date">
+         </time>
+         <p class="whitespace-pre-wrap text-gray-800 mb-6" id="note-detail-content">
+         </p>
+         <p class="text-sm text-indigo-600 font-semibold mb-6" id="note-detail-tags">
+         </p>
+         <div class="flex space-x-4">
+          <button aria-label="Edit catatan" class="bg-yellow-400 text-indigo-900 font-semibold px-5 py-2 rounded-lg shadow hover:bg-yellow-300 transition flex items-center space-x-2" id="edit-note-btn">
+           <i class="fas fa-edit">
+           </i>
+           <span>
+            Edit
+           </span>
+          </button>
+          <button aria-label="Hapus catatan" class="bg-red-500 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-red-600 transition flex items-center space-x-2" id="delete-note-btn">
+           <i class="fas fa-trash-alt">
+           </i>
+           <span>
+            Hapus
+           </span>
+          </button>
+         </div>
+        </div>
+        <div class="hidden" id="note-edit-form-container">
+         <form autocomplete="off" class="flex flex-col space-y-4" id="note-edit-form" novalidate="">
+          <label class="font-semibold text-gray-700" for="edit-note-title">
+           Judul Catatan
+          </label>
+          <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="edit-note-title" maxlength="100" name="title" placeholder="Judul catatan..." required="" type="text"/>
+          <label class="font-semibold text-gray-700" for="edit-note-content">
+           Isi Catatan
+          </label>
+          <textarea class="border border-gray-300 rounded-lg px-4 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500" id="edit-note-content" name="content" placeholder="Tulis catatan Anda di sini..." required="" rows="8"></textarea>
+          <label class="font-semibold text-gray-700" for="edit-note-tags">
+           Tag (pisahkan dengan koma)
+          </label>
+          <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="edit-note-tags" name="tags" placeholder="misal: kerja, pribadi, ide" type="text"/>
+          <div class="flex justify-between items-center">
+           <button class="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition" type="submit">
+            Simpan Perubahan
+           </button>
+           <button class="text-gray-600 hover:text-indigo-600 font-semibold px-4 py-2 rounded-lg focus:outline-none" id="cancel-edit-btn" type="button">
+            Batal
+           </button>
+          </div>
+         </form>
+        </div>
+       </div>
+      </div>
+      <div class="mt-6 flex flex-wrap gap-4 text-sm text-gray-600">
+       <span class="font-semibold">
+        Filter Kategori:
+       </span>
+       <button aria-pressed="true" class="filter-btn bg-indigo-100 text-indigo-700 rounded-full px-3 py-1 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" data-filter="all">
+        Semua
+       </button>
+       <button aria-pressed="false" class="filter-btn bg-indigo-100 text-indigo-700 rounded-full px-3 py-1 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" data-filter="date">
+        Tanggal
+       </button>
+       <button aria-pressed="false" class="filter-btn bg-indigo-100 text-indigo-700 rounded-full px-3 py-1 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" data-filter="tag">
+        Tag
+       </button>
+       <button aria-pressed="false" class="filter-btn bg-indigo-100 text-indigo-700 rounded-full px-3 py-1 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" data-filter="edited">
+        Terakhir Diedit
+       </button>
+      </div>
+     </div>
+    </section>
+    <!-- Quotes Tab -->
+    <section aria-label="Quotes Inspiratif" class="tab-content hidden" id="tab-quotes" role="tabpanel" tabindex="0">
+     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6 flex flex-col space-y-6">
+      <h2 class="text-xl font-extrabold text-indigo-700">
+       Quotes Inspiratif
+      </h2>
+      <div aria-label="Daftar quotes" class="space-y-4 max-h-[480px] overflow-y-auto" id="quotes-list" role="list">
+       <!-- Quotes list inserted dynamically -->
+      </div>
+      <form autocomplete="off" class="flex flex-col space-y-4 pt-6 border-t border-gray-200" id="quote-form" novalidate="">
+       <h3 class="text-lg font-semibold text-indigo-700">
+        Tambah / Edit Quotes
+       </h3>
+       <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="quote-text" maxlength="250" name="quote" placeholder="Tulis quotes..." required="" type="text"/>
+       <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="quote-author" maxlength="100" name="author" placeholder="Nama penulis" required="" type="text"/>
+       <div class="flex space-x-4">
+        <button class="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition flex items-center space-x-2" type="submit">
+         <i class="fas fa-plus">
+         </i>
+         <span>
+          Tambah / Simpan
+         </span>
+        </button>
+        <button class="text-gray-600 hover:text-indigo-600 font-semibold px-4 py-3 rounded-lg focus:outline-none hidden" id="quote-cancel-btn" type="button">
+         Batal
+        </button>
+       </div>
+      </form>
+      <div class="mt-6 flex items-center space-x-4">
+       <label class="font-semibold text-gray-700" for="quote-interval">
+        Interval pergantian quotes (detik):
+       </label>
+       <input class="w-20 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="quote-interval" max="300" min="5" step="5" type="number" value="30"/>
+      </div>
+     </div>
+    </section>
+    <!-- Profile Tab -->
+    <section aria-label="Profil Pengguna" class="tab-content hidden" id="tab-profile" role="tabpanel" tabindex="0">
+     <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6 flex flex-col space-y-6 items-center">
+      <h2 class="text-xl font-extrabold text-indigo-700">
+       Profil Pengguna
+      </h2>
+      <div class="relative w-32 h-32 rounded-full overflow-hidden shadow-lg">
+       <img alt="Foto profil pengguna SHDK Diary" class="object-cover w-full h-full" height="128" id="profile-photo" src="https://storage.googleapis.com/a1aa/image/7724f0c8-d927-4b88-4e6b-f39e053a9fcd.jpg" width="128"/>
+       <label aria-label="Ubah Foto Profil" class="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 cursor-pointer shadow-lg" for="profile-photo-input" role="button" tabindex="0" title="Ubah Foto Profil">
+        <i class="fas fa-camera">
+        </i>
+       </label>
+       <input accept="image/*" class="hidden" id="profile-photo-input" type="file"/>
+      </div>
+      <form autocomplete="off" class="w-full max-w-md flex flex-col space-y-4" id="profile-form" novalidate="">
+       <label class="font-semibold text-gray-700" for="profile-name">
+        Nama
+       </label>
+       <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="profile-name" maxlength="50" name="name" placeholder="Nama Anda" required="" type="text"/>
+       <label class="font-semibold text-gray-700" for="profile-email">
+        Email
+       </label>
+       <input class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="profile-email" name="email" placeholder="Email Anda" required="" type="email"/>
+       <button class="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition" type="submit">
+        Perbarui Profil
+       </button>
+      </form>
+     </div>
+    </section>
+    <!-- Settings Modal -->
+    <div aria-labelledby="settings-title" aria-modal="true" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="settings-modal" role="dialog">
+     <div class="bg-white rounded-xl shadow-lg max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <header class="flex justify-between items-center mb-6">
+       <h2 class="text-2xl font-extrabold text-indigo-700" id="settings-title">
+        Pengaturan
+       </h2>
+       <button aria-label="Tutup Pengaturan" class="text-indigo-700 hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 rounded" id="settings-close-btn">
+        <i class="fas fa-times fa-lg">
+        </i>
+       </button>
+      </header>
+      <form autocomplete="off" class="space-y-8" id="settings-form" novalidate="">
+       <!-- Language -->
+       <section>
+        <h3 class="text-lg font-semibold text-indigo-700 mb-3">
+         Pilihan Bahasa
+        </h3>
+        <div class="flex space-x-6">
+         <label class="inline-flex items-center space-x-2 cursor-pointer">
+          <input class="form-radio text-indigo-600" name="language" type="radio" value="id"/>
+          <span>
+           Bahasa Indonesia
+          </span>
+         </label>
+         <label class="inline-flex items-center space-x-2 cursor-pointer">
+          <input class="form-radio text-indigo-600" name="language" type="radio" value="en"/>
+          <span>
+           English
+          </span>
+         </label>
+        </div>
+       </section>
+       <!-- Theme -->
+       <section>
+        <h3 class="text-lg font-semibold text-indigo-700 mb-3">
+         Tema
+        </h3>
+        <div class="flex space-x-6">
+         <label class="inline-flex items-center space-x-2 cursor-pointer">
+          <input class="form-radio text-indigo-600" name="theme" type="radio" value="default"/>
+          <span>
+           Default
+          </span>
+         </label>
+         <label class="inline-flex items-center space-x-2 cursor-pointer">
+          <input class="form-radio text-indigo-600" name="theme" type="radio" value="light"/>
+          <span>
+           Terang
+          </span>
+         </label>
+         <label class="inline-flex items-center space-x-2 cursor-pointer">
+          <input class="form-radio text-indigo-600" name="theme" type="radio" value="dark"/>
+          <span>
+           Gelap
+          </span>
+         </label>
+         <label class="inline-flex items-center space-x-2 cursor-pointer">
+          <input class="form-radio text-indigo-600" name="theme" type="radio" value="custom"/>
+          <span>
+           Custom
+          </span>
+         </label>
+        </div>
+        <div class="mt-4 space-y-4 hidden" id="custom-theme-settings">
+         <div>
+          <label class="block font-semibold text-gray-700 mb-1" for="custom-header-color">
+           Warna Header
+          </label>
+          <input class="w-20 h-10 p-0 border-0 cursor-pointer" id="custom-header-color" name="customHeaderColor" type="color" value="#4f46e5"/>
+         </div>
+         <div>
+          <label class="block font-semibold text-gray-700 mb-1" for="custom-body-color">
+           Warna Body
+          </label>
+          <input class="w-20 h-10 p-0 border-0 cursor-pointer" id="custom-body-color" name="customBodyColor" type="color" value="#f9fafb"/>
+         </div>
+         <div>
+          <label class="block font-semibold text-gray-700 mb-1" for="custom-font-family">
+           Jenis Font
+          </label>
+          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="custom-font-family" name="customFontFamily">
+           <option selected="" value="'Poppins', sans-serif">
+            Poppins (Default)
+           </option>
+           <option value="'Roboto', sans-serif">
+            Roboto
+           </option>
+           <option value="'Open Sans', sans-serif">
+            Open Sans
+           </option>
+           <option value="'Lato', sans-serif">
+            Lato
+           </option>
+           <option value="'Montserrat', sans-serif">
+            Montserrat
+           </option>
+          </select>
+         </div>
+         <div>
+          <label class="block font-semibold text-gray-700 mb-1" for="custom-font-size">
+           Ukuran Font (px)
+          </label>
+          <input class="w-20 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="custom-font-size" max="24" min="12" name="customFontSize" type="number" value="16"/>
+         </div>
+         <div>
+          <label class="block font-semibold text-gray-700 mb-1" for="custom-font-color">
+           Warna Font
+          </label>
+          <input class="w-20 h-10 p-0 border-0 cursor-pointer" id="custom-font-color" name="customFontColor" type="color" value="#1f2937"/>
+         </div>
+        </div>
+       </section>
+       <!-- Privacy -->
+       <section>
+        <h3 class="text-lg font-semibold text-indigo-700 mb-3">
+         Privasi
+        </h3>
+        <div class="flex items-center space-x-3">
+         <input class="form-checkbox text-indigo-600" id="pin-enable" name="pinEnable" type="checkbox"/>
+         <label class="font-semibold cursor-pointer" for="pin-enable">
+          Aktifkan PIN 4 Digit untuk membuka aplikasi
+         </label>
+        </div>
+        <div class="mt-4 hidden space-y-4 max-w-xs" id="pin-setup-container">
+         <label class="block font-semibold text-gray-700" for="pin-setup">
+          Buat PIN 4 Digit
+         </label>
+         <input autocomplete="off" class="w-full text-center text-3xl font-mono border border-indigo-600 rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600" id="pin-setup" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" type="password"/>
+         <button class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition" id="pin-save-btn">
+          Simpan PIN
+         </button>
+         <p class="text-red-600 hidden" id="pin-setup-error">
+          PIN harus 4 digit angka.
+         </p>
+         <p class="text-green-600 hidden" id="pin-setup-success">
+          PIN berhasil disimpan.
+         </p>
+        </div>
+       </section>
+       <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+        <button class="bg-gray-300 text-gray-700 font-semibold px-6 py-2 rounded-lg hover:bg-gray-400 transition" id="settings-cancel-btn" type="button">
+         Batal
+        </button>
+        <button class="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 transition" type="submit">
+         Simpan Pengaturan
+        </button>
+       </div>
+      </form>
+     </div>
+    </div>
+   </main>
+  </div>
+  <script>
+   // Data storage keys
+  const STORAGE_KEYS = {
+    NOTES: 'shdk_notes',
+    QUOTES: 'shdk_quotes',
+    PROFILE: 'shdk_profile',
+    SETTINGS: 'shdk_settings',
+    PIN: 'shdk_pin',
+  };
+
+  // Elements
+  const tabs = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const settingsModal = document.getElementById('settings-modal');
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsCloseBtn = document.getElementById('settings-close-btn');
+  const settingsCancelBtn = document.getElementById('settings-cancel-btn');
+  const settingsForm = document.getElementById('settings-form');
+  const customThemeSettings = document.getElementById('custom-theme-settings');
+  const pinEnableCheckbox = document.getElementById('pin-enable');
+  const pinSetupContainer = document.getElementById('pin-setup-container');
+  const pinSetupInput = document.getElementById('pin-setup');
+  const pinSaveBtn = document.getElementById('pin-save-btn');
+  const pinSetupError = document.getElementById('pin-setup-error');
+  const pinSetupSuccess = document.getElementById('pin-setup-success');
+
+  const pinLockScreen = document.getElementById('pin-lock-screen');
+  const pinInput = document.getElementById('pin-input');
+  const pinSubmitBtn = document.getElementById('pin-submit');
+  const pinErrorMsg = document.getElementById('pin-error');
+
+  // Home tab elements
+  const latestNoteTitle = document.getElementById('latest-note-title');
+  const latestNoteContent = document.getElementById('latest-note-content');
+  const latestNoteDate = document.getElementById('latest-note-date');
+  const dailyQuoteText = document.getElementById('daily-quote-text');
+  const dailyQuoteAuthor = document.getElementById('daily-quote-author');
+
+  // Write tab elements
+  const noteForm = document.getElementById('note-form');
+  const noteTitleInput = document.getElementById('note-title');
+  const noteContentInput = document.getElementById('note-content');
+  const noteTagsInput = document.getElementById('note-tags');
+  const autoSaveMsg = document.getElementById('auto-save-msg');
+
+  // Library tab elements
+  const searchNotesInput = document.getElementById('search-notes');
+  const notesList = document.getElementById('notes-list');
+  const noteDetailTitle = document.getElementById('note-detail-title');
+  const noteDetailContent = document.getElementById('note-detail-content');
+  const noteDetailDate = document.getElementById('note-detail-date');
+  const noteDetailTags = document.getElementById('note-detail-tags');
+  const editNoteBtn = document.getElementById('edit-note-btn');
+  const deleteNoteBtn = document.getElementById('delete-note-btn');
+  const noteEditFormContainer = document.getElementById('note-edit-form-container');
+  const noteEditForm = document.getElementById('note-edit-form');
+  const editNoteTitleInput = document.getElementById('edit-note-title');
+  const editNoteContentInput = document.getElementById('edit-note-content');
+  const editNoteTagsInput = document.getElementById('edit-note-tags');
+  const cancelEditBtn = document.getElementById('cancel-edit-btn');
+  const filterButtons = document.querySelectorAll('.filter-btn');
+
+  // Quotes tab elements
+  const quotesList = document.getElementById('quotes-list');
+  const quoteForm = document.getElementById('quote-form');
+  const quoteTextInput = document.getElementById('quote-text');
+  const quoteAuthorInput = document.getElementById('quote-author');
+  const quoteCancelBtn = document.getElementById('quote-cancel-btn');
+  const quoteIntervalInput = document.getElementById('quote-interval');
+
+  // Profile tab elements
+  const profilePhoto = document.getElementById('profile-photo');
+  const profilePhotoInput = document.getElementById('profile-photo-input');
+  const profileForm = document.getElementById('profile-form');
+  const profileNameInput = document.getElementById('profile-name');
+  const profileEmailInput = document.getElementById('profile-email');
+
+  // App state
+  let notes = [];
+  let quotes = [];
+  let profile = { name: '', email: '', photo: '' };
+  let settings = {
+    language: 'id',
+    theme: 'default',
+    customTheme: {
+      headerColor: '#4f46e5',
+      bodyColor: '#f9fafb',
+      fontFamily: "'Poppins', sans-serif",
+      fontSize: 16,
+      fontColor: '#1f2937',
+    },
+    pinEnabled: false,
+  };
+  let pinCode = null;
+  let currentQuoteIndex = 0;
+  let quoteTimer = null;
+  let currentTab = 'home';
+  let filteredNotes = [];
+  let currentFilter = 'all';
+  let editingNoteId = null;
+  let editingQuoteId = null;
+
+  // Utility functions
+  function saveToStorage(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  function loadFromStorage(key, defaultValue) {
+    const data = localStorage.getItem(key);
+    if (!data) return defaultValue;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return defaultValue;
+    }
+  }
+  function formatDateTime(dateStr) {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    return d.toLocaleString(settings.language === 'en' ? 'en-US' : 'id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+  function truncateText(text, maxLength = 50) {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  }
+  function generateId() {
+    return '_' + Math.random().toString(36).substr(2, 9);
+  }
+  function applyTheme() {
+    const root = document.documentElement;
+    if (settings.theme === 'default') {
+      root.style.setProperty('--header-bg', '#4f46e5');
+      root.style.setProperty('--body-bg', '#f9fafb');
+      root.style.setProperty('--font-family', "'Poppins', sans-serif");
+      root.style.setProperty('--font-size', '16px');
+      root.style.setProperty('--font-color', '#1f2937');
+      document.body.classList.remove('dark');
+    } else if (settings.theme === 'light') {
+      root.style.setProperty('--header-bg', '#2563eb');
+      root.style.setProperty('--body-bg', '#ffffff');
+      root.style.setProperty('--font-family', "'Poppins', sans-serif");
+      root.style.setProperty('--font-size', '16px');
+      root.style.setProperty('--font-color', '#111827');
+      document.body.classList.remove('dark');
+    } else if (settings.theme === 'dark') {
+      root.style.setProperty('--header-bg', '#1e293b');
+      root.style.setProperty('--body-bg', '#0f172a');
+      root.style.setProperty('--font-family', "'Poppins', sans-serif");
+      root.style.setProperty('--font-size', '16px');
+      root.style.setProperty('--font-color', '#e0e7ff');
+      document.body.classList.add('dark');
+    } else if (settings.theme === 'custom') {
+      root.style.setProperty('--header-bg', settings.customTheme.headerColor);
+      root.style.setProperty('--body-bg', settings.customTheme.bodyColor);
+      root.style.setProperty('--font-family', settings.customTheme.fontFamily);
+      root.style.setProperty('--font-size', settings.customTheme.fontSize + 'px');
+      root.style.setProperty('--font-color', settings.customTheme.fontColor);
+      document.body.classList.remove('dark');
+    }
+    // Apply colors to header and body
+    document.querySelector('header').style.backgroundColor = getComputedStyle(root).getPropertyValue('--header-bg');
+    document.body.style.backgroundColor = getComputedStyle(root).getPropertyValue('--body-bg');
+    document.body.style.color = getComputedStyle(root).getPropertyValue('--font-color');
+    document.body.style.fontFamily = getComputedStyle(root).getPropertyValue('--font-family');
+    document.body.style.fontSize = getComputedStyle(root).getPropertyValue('--font-size');
+  }
+  function showTab(tabName) {
+    currentTab = tabName;
+    tabContents.forEach((section) => {
+      if (section.id === 'tab-' + tabName) {
+        section.classList.remove('hidden');
+        section.setAttribute('aria-hidden', 'false');
+      } else {
+        section.classList.add('hidden');
+        section.setAttribute('aria-hidden', 'true');
+      }
+    });
+    tabs.forEach((btn) => {
+      if (btn.dataset.tab === tabName) {
+        btn.classList.add('text-indigo-600', 'border-b-4', 'border-indigo-600', 'font-semibold');
+        btn.setAttribute('aria-current', 'page');
+      } else {
+        btn.classList.remove('text-indigo-600', 'border-b-4', 'border-indigo-600', 'font-semibold');
+        btn.setAttribute('aria-current', 'false');
+      }
+    });
+    if (tabName === 'home') {
+      renderLatestNote();
+      startQuoteRotation();
+    } else {
+      stopQuoteRotation();
+    }
+    if (tabName === 'library') {
+      renderNotesList();
+      clearNoteDetail();
+    }
+    if (tabName === 'quotes') {
+      renderQuotesList();
+    }
+    if (tabName === 'profile') {
+      renderProfile();
+    }
+  }
+  function startQuoteRotation() {
+    if (quotes.length === 0) {
+      dailyQuoteText.textContent = 'Tidak ada quotes tersedia.';
+      dailyQuoteAuthor.textContent = '';
+      return;
+    }
+    currentQuoteIndex = 0;
+    updateDailyQuote();
+    if (quoteTimer) clearInterval(quoteTimer);
+    quoteTimer = setInterval(() => {
+      currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+      updateDailyQuote();
+    }, settings.quoteInterval || 30000);
+  }
+  function stopQuoteRotation() {
+    if (quoteTimer) {
+      clearInterval(quoteTimer);
+      quoteTimer = null;
+    }
+  }
+  function updateDailyQuote() {
+    if (quotes.length === 0) return;
+    const q = quotes[currentQuoteIndex];
+    dailyQuoteText.textContent = `"${q.text}"`;
+    dailyQuoteAuthor.textContent = `– ${q.author}`;
+  }
+  function renderLatestNote() {
+    if (notes.length === 0) {
+      latestNoteTitle.textContent = 'Belum ada catatan';
+      latestNoteContent.textContent = 'Buat catatan baru di menu Tulis Catatan.';
+      latestNoteDate.textContent = '';
+      return;
+    }
+    // Sort notes by createdAt descending
+    const sorted = [...notes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const latest = sorted[0];
+    latestNoteTitle.textContent = latest.title || '(Tanpa Judul)';
+    latestNoteContent.textContent = latest.content || '(Kosong)';
+    latestNoteDate.textContent = formatDateTime(latest.createdAt);
+  }
+  function renderNotesList() {
+    // Filter notes based on currentFilter and search
+    let filtered = [...notes];
+    const searchTerm = searchNotesInput.value.trim().toLowerCase();
+    if (searchTerm) {
+      filtered = filtered.filter(note =>
+        (note.title && note.title.toLowerCase().includes(searchTerm)) ||
+        (note.content && note.content.toLowerCase().includes(searchTerm)) ||
+        (note.tags && note.tags.some(t => t.toLowerCase().includes(searchTerm)))
+      );
+    }
+    if (currentFilter === 'date') {
+      filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    } else if (currentFilter === 'edited') {
+      filtered.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+    } else if (currentFilter === 'tag') {
+      filtered.sort((a, b) => {
+        const aTag = a.tags && a.tags.length > 0 ? a.tags[0].toLowerCase() : '';
+        const bTag = b.tags && b.tags.length > 0 ? b.tags[0].toLowerCase() : '';
+        return aTag.localeCompare(bTag);
+      });
+    } else {
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+    filteredNotes = filtered;
+    notesList.innerHTML = '';
+    if (filtered.length === 0) {
+      notesList.innerHTML = '<p class="text-gray-500 italic">Tidak ada catatan ditemukan.</p>';
+      clearNoteDetail();
+      return;
+    }
+    filtered.forEach(note => {
+      const noteItem = document.createElement('button');
+      noteItem.type = 'button';
+      noteItem.className = 'w-full text-left p-3 rounded-lg hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 truncate';
+      noteItem.textContent = `${note.title || '(Tanpa Judul)'} — ${formatDateTime(note.createdAt)}`;
+      noteItem.setAttribute('aria-label', `Buka catatan berjudul ${note.title || '(Tanpa Judul)'}`);
+      noteItem.addEventListener('click', () => {
+        showNoteDetail(note.id);
+      });
+      notesList.appendChild(noteItem);
+    });
+  }
+  function clearNoteDetail() {
+    noteDetailTitle.textContent = '';
+    noteDetailContent.textContent = '';
+    noteDetailDate.textContent = '';
+    noteDetailTags.textContent = '';
+    editNoteBtn.disabled = true;
+    deleteNoteBtn.disabled = true;
+    noteEditFormContainer.classList.add('hidden');
+    noteEditForm.reset();
+    editingNoteId = null;
+  }
+  function showNoteDetail(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    editingNoteId = noteId;
+    noteDetailTitle.textContent = note.title || '(Tanpa Judul)';
+    noteDetailContent.textContent = note.content || '(Kosong)';
+    noteDetailDate.textContent = `Dibuat: ${formatDateTime(note.createdAt)}` + (note.updatedAt ? ` | Diedit: ${formatDateTime(note.updatedAt)}` : '');
+    noteDetailTags.textContent = note.tags && note.tags.length > 0 ? `Tag: ${note.tags.join(', ')}` : '';
+    editNoteBtn.disabled = false;
+    deleteNoteBtn.disabled = false;
+    noteEditFormContainer.classList.add('hidden');
+  }
+  function startEditingNote() {
+    if (!editingNoteId) return;
+    const note = notes.find(n => n.id === editingNoteId);
+    if (!note) return;
+    noteEditFormContainer.classList.remove('hidden');
+    noteDetailTitle.textContent = '';
+    noteDetailContent.textContent = '';
+    noteDetailDate.textContent = '';
+    noteDetailTags.textContent = '';
+    editNoteTitleInput.value = note.title || '';
+    editNoteContentInput.value = note.content || '';
+    editNoteTagsInput.value = note.tags ? note.tags.join(', ') : '';
+  }
+  function cancelEditingNote() {
+    noteEditFormContainer.classList.add('hidden');
+    if (editingNoteId) {
+      showNoteDetail(editingNoteId);
+    } else {
+      clearNoteDetail();
+    }
+  }
+  function renderQuotesList() {
+    quotesList.innerHTML = '';
+    if (quotes.length === 0) {
+      quotesList.innerHTML = '<p class="text-gray-500 italic">Belum ada quotes tersedia.</p>';
+      return;
+    }
+    quotes.forEach(q => {
+      const quoteItem = document.createElement('div');
+      quoteItem.className = 'border border-gray-300 rounded-lg p-4 flex justify-between items-center';
+      const quoteText = document.createElement('div');
+      quoteText.className = 'flex-grow pr-4';
+      const pQuote = document.createElement('p');
+      pQuote.className = 'italic text-indigo-900';
+      pQuote.textContent = `"${q.text}"`;
+      const pAuthor = document.createElement('footer');
+      pAuthor.className = 'font-semibold text-indigo-700 mt-1';
+      pAuthor.textContent = `– ${q.author}`;
+      quoteText.appendChild(pQuote);
+      quoteText.appendChild(pAuthor);
+      const actions = document.createElement('div');
+      actions.className = 'flex space-x-2';
+      const editBtn = document.createElement('button');
+      editBtn.className = 'text-yellow-500 hover:text-yellow-400 focus:outline-none';
+      editBtn.title = 'Edit quote';
+      editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+      editBtn.addEventListener('click', () => {
+        editingQuoteId = q.id;
+        quoteTextInput.value = q.text;
+        quoteAuthorInput.value = q.author;
+        quoteCancelBtn.classList.remove('hidden');
+        quoteTextInput.focus();
+      });
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'text-red-600 hover:text-red-500 focus:outline-none';
+      deleteBtn.title = 'Hapus quote';
+      deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Yakin ingin menghapus quote ini?')) {
+          quotes = quotes.filter(quote => quote.id !== q.id);
+          saveToStorage(STORAGE_KEYS.QUOTES, quotes);
+          renderQuotesList();
+          if (currentTab === 'home') startQuoteRotation();
+        }
+      });
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+      quoteItem.appendChild(quoteText);
+      quoteItem.appendChild(actions);
+      quotesList.appendChild(quoteItem);
+    });
+  }
+  function renderProfile() {
+    profileNameInput.value = profile.name || '';
+    profileEmailInput.value = profile.email || '';
+    if (profile.photo) {
+      profilePhoto.src = profile.photo;
+    } else {
+      profilePhoto.src = 'https://placehold.co/128x128/png?text=Foto+Profil';
+    }
+  }
+  function loadAllData() {
+    notes = loadFromStorage(STORAGE_KEYS.NOTES, []);
+    quotes = loadFromStorage(STORAGE_KEYS.QUOTES, []);
+    profile = loadFromStorage(STORAGE_KEYS.PROFILE, { name: '', email: '', photo: '' });
+    settings = loadFromStorage(STORAGE_KEYS.SETTINGS, settings);
+    pinCode = localStorage.getItem(STORAGE_KEYS.PIN);
+    if (!quotes.length) {
+      // Default quotes
+      quotes = [
+        { id: generateId(), text: "Jangan pernah menyerah pada mimpi-mimpimu, karena mimpi adalah bahan bakar kehidupan.", author: "SHDK Diary" },
+        { id: generateId(), text: "Kreativitas adalah kecerdasan yang bersenang-senang.", author: "Albert Einstein" },
+        { id: generateId(), text: "Hidup bukan tentang menunggu badai berlalu, tapi belajar menari di tengah hujan.", author: "Vivian Greene" },
+        { id: generateId(), text: "Kesuksesan adalah hasil dari persiapan, kerja keras, dan belajar dari kegagalan.", author: "Colin Powell" },
+        { id: generateId(), text: "Jadilah perubahan yang ingin kamu lihat di dunia.", author: "Mahatma Gandhi" },
+        { id: generateId(), text: "Setiap hari adalah halaman kosong dalam buku kehidupanmu. Tulislah cerita yang indah.", author: "SHDK Diary" },
+      ];
+      saveToStorage(STORAGE_KEYS.QUOTES, quotes);
+    }
+    if (!settings.quoteInterval) settings.quoteInterval = 30000;
+  }
+  function saveNotes() {
+    saveToStorage(STORAGE_KEYS.NOTES, notes);
+  }
+  function saveProfile() {
+    saveToStorage(STORAGE_KEYS.PROFILE, profile);
+  }
+  function saveSettings() {
+    saveToStorage(STORAGE_KEYS.SETTINGS, settings);
+  }
+  function savePin(pin) {
+    localStorage.setItem(STORAGE_KEYS.PIN, pin);
+    pinCode = pin;
+  }
+  function validatePin(pin) {
+    return /^\d{4}$/.test(pin);
+  }
+  function showPinLockScreen() {
+    pinLockScreen.classList.remove('hidden');
+    pinInput.value = '';
+    pinErrorMsg.classList.add('hidden');
+    pinInput.focus();
+  }
+  function hidePinLockScreen() {
+    pinLockScreen.classList.add('hidden');
+  }
+  function initAutoSave() {
+    let timeoutId = null;
+    function autoSave() {
+      if (!noteTitleInput.value.trim() && !noteContentInput.value.trim()) {
+        autoSaveMsg.classList.add('hidden');
+        return;
+      }
+      const tempNote = {
+        id: 'temp',
+        title: noteTitleInput.value.trim(),
+        content: noteContentInput.value.trim(),
+        tags: noteTagsInput.value.split(',').map(t => t.trim()).filter(t => t),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('shdk_temp_note', JSON.stringify(tempNote));
+      autoSaveMsg.classList.remove('hidden');
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        autoSaveMsg.classList.add('hidden');
+      }, 2000);
+    }
+    noteTitleInput.addEventListener('input', autoSave);
+    noteContentInput.addEventListener('input', autoSave);
+    noteTagsInput.addEventListener('input', autoSave);
+    // Load temp note if exists
+    const tempNoteRaw = localStorage.getItem('shdk_temp_note');
+    if (tempNoteRaw) {
+      try {
+        const tempNote = JSON.parse(tempNoteRaw);
+        noteTitleInput.value = tempNote.title || '';
+        noteContentInput.value = tempNote.content || '';
+        noteTagsInput.value = tempNote.tags ? tempNote.tags.join(', ') : '';
+      } catch {}
+    }
+  }
+  function clearTempNote() {
+    localStorage.removeItem('shdk_temp_note');
+  }
+  function updateFilterButtons() {
+    filterButtons.forEach(btn => {
+      if (btn.dataset.filter === currentFilter) {
+        btn.classList.add('bg-indigo-200');
+        btn.setAttribute('aria-pressed', 'true');
+      } else {
+        btn.classList.remove('bg-indigo-200');
+        btn.setAttribute('aria-pressed', 'false');
+      }
+    });
+  }
+
+  // Event Listeners
+
+  // Tab navigation
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      showTab(btn.dataset.tab);
+    });
+  });
+
+  // Settings modal open/close
+  settingsBtn.addEventListener('click', () => {
+    settingsModal.classList.remove('hidden');
+    // Set form values
+    settingsForm.language.value = settings.language;
+    settingsForm.theme.value = settings.theme;
+    pinEnableCheckbox.checked = settings.pinEnabled;
+    if (settings.theme === 'custom') {
+      customThemeSettings.classList.remove('hidden');
+      document.getElementById('custom-header-color').value = settings.customTheme.headerColor;
+      document.getElementById('custom-body-color').value = settings.customTheme.bodyColor;
+      document.getElementById('custom-font-family').value = settings.customTheme.fontFamily;
+      document.getElementById('custom-font-size').value = settings.customTheme.fontSize;
+      document.getElementById('custom-font-color').value = settings.customTheme.fontColor;
+    } else {
+      customThemeSettings.classList.add('hidden');
+    }
+  });
+  settingsCloseBtn.addEventListener('click', () => {
+    settingsModal.classList.add('hidden');
+  });
+  settingsCancelBtn.addEventListener('click', () => {
+    settingsModal.classList.add('hidden');
+  });
+
+  // Theme radio change
+  settingsForm.theme.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (settingsForm.theme.value === 'custom') {
+        customThemeSettings.classList.remove('hidden');
+      } else {
+        customThemeSettings.classList.add('hidden');
+      }
+    });
+  });
+
+  // PIN enable checkbox toggle
+  pinEnableCheckbox.addEventListener('change', () => {
+    if (pinEnableCheckbox.checked) {
+      pinSetupContainer.classList.remove('hidden');
+    } else {
+      pinSetupContainer.classList.add('hidden');
+    }
+  });
+
+  // Save PIN button
+  pinSaveBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const pinVal = pinSetupInput.value.trim();
+    if (!validatePin(pinVal)) {
+      pinSetupError.classList.remove('hidden');
+      pinSetupSuccess.classList.add('hidden');
+      return;
+    }
+    pinSetupError.classList.add('hidden');
+    pinSetupSuccess.classList.remove('hidden');
+    savePin(pinVal);
+    settings.pinEnabled = true;
+    saveSettings();
+    setTimeout(() => {
+      pinSetupSuccess.classList.add('hidden');
+      pinSetupInput.value = '';
+      pinSetupContainer.classList.add('hidden');
+      pinEnableCheckbox.checked = true;
+    }, 2000);
+  });
+
+  // Settings form submit
+  settingsForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    settings.language = settingsForm.language.value;
+    settings.theme = settingsForm.theme.value;
+    if (settings.theme === 'custom') {
+      settings.customTheme.headerColor = document.getElementById('custom-header-color').value;
+      settings.customTheme.bodyColor = document.getElementById('custom-body-color').value;
+      settings.customTheme.fontFamily = document.getElementById('custom-font-family').value;
+      settings.customTheme.fontSize = parseInt(document.getElementById('custom-font-size').value) || 16;
+      settings.customTheme.fontColor = document.getElementById('custom-font-color').value;
+    }
+    settings.pinEnabled = pinEnableCheckbox.checked;
+    if (!settings.pinEnabled) {
+      localStorage.removeItem(STORAGE_KEYS.PIN);
+      pinCode = null;
+    }
+    saveSettings();
+    applyTheme();
+    settingsModal.classList.add('hidden');
+  });
+
+  // PIN lock screen submit
+  pinSubmitBtn.addEventListener('click', () => {
+    const enteredPin = pinInput.value.trim();
+    if (enteredPin === pinCode) {
+      hidePinLockScreen();
+      showTab('home');
+    } else {
+      pinErrorMsg.classList.remove('hidden');
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  });
+  pinInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      pinSubmitBtn.click();
+    }
+  });
+
+  // Note form submit (new note)
+  noteForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = noteTitleInput.value.trim();
+    const content = noteContentInput.value.trim();
+    const tags = noteTagsInput.value.split(',').map(t => t.trim()).filter(t => t);
+    if (!title && !content) {
+      alert('Judul atau isi catatan harus diisi.');
+      return;
+    }
+    const newNote = {
+      id: generateId(),
+      title,
+      content,
+      tags,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    notes.push(newNote);
+    saveNotes();
+    clearTempNote();
+    noteForm.reset();
+    alert('Catatan berhasil disimpan.');
+    renderLatestNote();
+  });
+
+  // Search notes input
+  searchNotesInput.addEventListener('input', () => {
+    renderNotesList();
+  });
+
+  // Filter buttons
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentFilter = btn.dataset.filter;
+      updateFilterButtons();
+      renderNotesList();
+      clearNoteDetail();
+    });
+  });
+
+  // Edit note button
+  editNoteBtn.addEventListener('click', () => {
+    startEditingNote();
+  });
+
+  // Cancel edit note button
+  cancelEditBtn.addEventListener('click', () => {
+    cancelEditingNote();
+  });
+
+  // Edit note form submit
+  noteEditForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!editingNoteId) return;
+    const title = editNoteTitleInput.value.trim();
+    const content = editNoteContentInput.value.trim();
+    const tags = editNoteTagsInput.value.split(',').map(t => t.trim()).filter(t => t);
+    if (!title && !content) {
+      alert('Judul atau isi catatan harus diisi.');
+      return;
+    }
+    const noteIndex = notes.findIndex(n => n.id === editingNoteId);
+    if (noteIndex === -1) return;
+    notes[noteIndex].title = title;
+    notes[noteIndex].content = content;
+    notes[noteIndex].tags = tags;
+    notes[noteIndex].updatedAt = new Date().toISOString();
+    saveNotes();
+    alert('Catatan berhasil diperbarui.');
+    noteEditFormContainer.classList.add('hidden');
+    renderNotesList();
+    showNoteDetail(editingNoteId);
+    renderLatestNote();
+  });
+
+  // Delete note button
+  deleteNoteBtn.addEventListener('click', () => {
+    if (!editingNoteId) return;
+    if (confirm('Yakin ingin menghapus catatan ini?')) {
+      notes = notes.filter(n => n.id !== editingNoteId);
+      saveNotes();
+      alert('Catatan berhasil dihapus.');
+      renderNotesList();
+      clearNoteDetail();
+      renderLatestNote();
+    }
+  });
+
+  // Quotes form submit (add or edit)
+  quoteForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = quoteTextInput.value.trim();
+    const author = quoteAuthorInput.value.trim();
+    if (!text || !author) {
+      alert('Quotes dan nama penulis harus diisi.');
+      return;
+    }
+    if (editingQuoteId) {
+      // Edit existing quote
+      const idx = quotes.findIndex(q => q.id === editingQuoteId);
+      if (idx !== -1) {
+        quotes[idx].text = text;
+        quotes[idx].author = author;
+      }
+      editingQuoteId = null;
+      quoteCancelBtn.classList.add('hidden');
+    } else {
+      // Add new quote
+      quotes.push({ id: generateId(), text, author });
+    }
+    saveToStorage(STORAGE_KEYS.QUOTES, quotes);
+    quoteForm.reset();
+    renderQuotesList();
+    if (currentTab === 'home') startQuoteRotation();
+  });
+
+  // Quote cancel button
+  quoteCancelBtn.addEventListener('click', () => {
+    editingQuoteId = null;
+    quoteForm.reset();
+    quoteCancelBtn.classList.add('hidden');
+  });
+
+  // Quote interval change
+  quoteIntervalInput.addEventListener('change', () => {
+    let val = parseInt(quoteIntervalInput.value);
+    if (isNaN(val) || val < 5) val = 5;
+    if (val > 300) val = 300;
+    quoteIntervalInput.value = val;
+    settings.quoteInterval = val * 1000;
+    saveSettings();
+    if (currentTab === 'home') {
+      startQuoteRotation();
+    }
+  });
+
+  // Profile photo change
+  profilePhotoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('File harus berupa gambar.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      profile.photo = evt.target.result;
+      profilePhoto.src = profile.photo;
+      saveProfile();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Profile form submit
+  profileForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = profileNameInput.value.trim();
+    const email = profileEmailInput.value.trim();
+    if (!name || !email) {
+      alert('Nama dan email harus diisi.');
+      return;
+    }
+    profile.name = name;
+    profile.email = email;
+    saveProfile();
+    alert('Profil berhasil diperbarui.');
+  });
+
+  // Initialization
+  function init() {
+    loadAllData();
+    applyTheme();
+    updateFilterButtons();
+    showTab('home');
+    initAutoSave();
+
+    // Show PIN lock screen if enabled
+    if (settings.pinEnabled && pinCode) {
+      showPinLockScreen();
+    }
+  }
+
+  // Run init on page load
+  window.addEventListener('load', init);
+
+  // Accessibility: trap focus in settings modal when open
+  settingsModal.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      settingsModal.classList.add('hidden');
+    }
+  });
+  </script>
+ </body>
+</html>
