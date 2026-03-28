@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MyCash v4 - Livin Style (Agen Edition)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #004481;
+            --secondary: #00A5D9;
+            --accent: #FDBA12;
+            --accent-hover: #E0A40F;
+            --bg: #F4F6F9;
+            --text: #333333;
+            --danger: #E74C3C;
+            --success: #2ECC71;
+            --white: #FFFFFF;
+            --gray: #888888;
+            --light-gray: #ddd;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background-color: #e0e0e0; display: flex; justify-content: center; color: var(--text); }
+        
+        #app {
+            width: 100%; max-width: 414px; background: var(--bg); min-height: 100vh; position: relative; overflow-x: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); padding-bottom: 90px;
+        }
+
+        /* Header */
+        .header { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: var(--white); 
+            padding: 25px 20px 85px; 
+            border-radius: 0 0 35px 35px; 
+            position: relative; 
+            z-index: 10; 
+        }
+        .header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { font-size: 14px; opacity: 0.8; margin-top: 2px; }
+
+        /* Generic Card Styling */
+        .card { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.06); position: relative; border: 1px solid rgba(0,0,0,0.02); }
+        
+        /* Master Card Styling (Total Balance) */
+        .master-card { border-top: 5px solid var(--accent); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .master-card .card-value { font-size: 28px; }
+        .master-card .card-label { font-size: 13px; color: var(--primary); opacity: 0.8; }
+
+        /* Container Kartu */
+        .tabungan-cards {
+            padding: 0 15px; margin-top: -55px; display: flex; flex-direction: column; gap: 15px; position: relative; z-index: 20; 
+        }
+
+        .atm-dashboard { 
+            padding: 0 15px; margin-top: -55px; display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; position: relative; z-index: 20; 
+        }
+        .atm-card-main { background: linear-gradient(135deg, #fff, #fcfcfc); border-left: 5px solid var(--primary); }
+        .atm-card-cuan { background: linear-gradient(135deg, #f0fff4, #fff); border-left: 5px solid var(--success); }
+        
+        .card-label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600; }
+        .card-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .card-value.cuan { color: var(--success); }
+        
+        /* Floating Action Buttons (FAB) */
+        .fab-container { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 414px; display: flex; justify-content: center; padding: 0 20px; z-index: 30; }
+        .btn-grand { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: var(--primary); border: none; padding: 15px 30px; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 15px rgba(253, 186, 18, 0.4); display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .btn-grand:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(253, 186, 18, 0.3); }
+
+        /* Section Titles & List */
+        .section-header { padding: 20px 15px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title { font-size: 16px; font-weight: 600; color: var(--primary); }
+        .btn-text { background: none; border: none; color: var(--secondary); font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-setor { background: #e8f8f5; color: var(--success); padding: 8px 12px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 13px;}
+
+        .list-container { padding: 0 15px; display: flex; flex-direction: column; gap: 10px; }
+        .list-item { background: var(--white); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); transition: 0.2s; }
+        .list-item:active { background: #fafafa; }
+        .item-info { flex: 1; }
+        .item-info h4 { font-size: 14px; color: var(--text); font-weight: 600; }
+        .item-info p { font-size: 12px; color: var(--gray); margin-top: 2px; }
+        .item-meta { display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 11px; color: var(--secondary); background: #f0f8ff; padding: 2px 6px; border-radius: 4px; display: inline-flex; }
+        
+        .item-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .item-amount { font-weight: 700; font-size: 14px; }
+        .item-amount.in { color: var(--success); }
+        .item-amount.out { color: var(--danger); }
+        .item-actions { display: flex; gap: 12px; font-size: 14px; color: #bbb; }
+        .item-actions i { cursor: pointer; padding: 2px; }
+        .item-actions i:hover { color: var(--primary); }
+        .item-actions .fa-trash:hover { color: var(--danger); }
+        
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 414px; background: var(--white); display: flex; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); border-radius: 20px 20px 0 0; z-index: 40; height: 70px; align-items: center; }
+        .nav-item { flex: 1; text-align: center; color: #aaa; cursor: pointer; transition: 0.3s; font-size: 12px; font-weight: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); font-weight: 600; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: flex-end; z-index: 100; visibility: hidden; opacity: 0; transition: 0.3s; }
+        .modal-overlay.open { display: flex; visibility: visible; opacity: 1; }
+        .modal-content { background: var(--white); width: 100%; max-width: 414px; border-radius: 25px 25px 0 0; padding: 30px 25px 20px; transform: translateY(100%); transition: 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.open .modal-content { transform: translateY(0); }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; color: var(--primary); font-weight: 700; }
+        .close-modal { font-size: 20px; color: #ccc; cursor: pointer; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; color: var(--gray); margin-bottom: 6px; font-weight: 500; }
+        .form-input { width: 100%; padding: 14px; border: 1px solid var(--light-gray); border-radius: 12px; font-size: 15px; outline: none; transition: 0.2s; color: var(--text); }
+        .form-input:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(0, 165, 217, 0.1); }
+        
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        /* Custom Select & Combobox */
+        .custom-select-wrapper { position: relative; }
+        .select-trigger { padding: 14px; border: 1px solid var(--light-gray); border-radius: 12px; font-size: 15px; background: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
+        .select-trigger.placeholder { color: #818181; }
+        .select-trigger::after { content: '\f078'; font-family: 'Font Awesome 5 Free'; font-weight: 900; font-size: 12px; color: #aaa; }
+        .select-options { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #fff; border: 1px solid var(--light-gray); border-radius: 12px; margin-top: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; max-height: 200px; overflow-y: auto; animation: fadeIn 0.2s; }
+        .select-options.upward { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 5px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .select-option { padding: 14px; cursor: pointer; border-bottom: 1px solid #f5f5f5; font-size: 14px; transition: 0.2s; }
+        .select-option:last-child { border-bottom: none; }
+        .select-option:hover { background: #f0f8ff; color: var(--primary); font-weight: 500; }
+
+        /* Buttons in Modal */
+        .modal-actions { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
+        .btn-submit { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-submit:hover { background: #003366; }
+        .btn-cancel { width: 100%; padding: 12px; background: transparent; color: var(--gray); border: none; font-size: 14px; cursor: pointer; font-weight: 500; }
+
+        /* Dialog Custom */
+        .dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 200; visibility: hidden; opacity: 0; transition: 0.2s; }
+        .dialog-overlay.open { display: flex; visibility: visible; opacity: 1; }
+        .dialog-content { background: var(--white); width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; text-align: center; transform: scale(0.9); transition: 0.2s; }
+        .dialog-overlay.open .dialog-content { transform: scale(1); }
+        .dialog-icon { font-size: 40px; margin-bottom: 15px; }
+        .dialog-icon.confirm { color: var(--accent); }
+        .dialog-icon.success { color: var(--success); }
+        .dialog-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+        .dialog-msg { font-size: 14px; color: var(--gray); margin-bottom: 20px; line-height: 1.4; }
+        .dialog-btns { display: flex; gap: 10px; }
+        .btn-dialog { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-dialog.primary { background: var(--primary); color: white; }
+        .btn-dialog.secondary { background: #f0f0f0; color: var(--text); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="header">
+        <h1>MyCash</h1>
+        <p id="greeting">Kelola keuanganmu dengan cerdas</p>
+    </div>
+
+    <div id="tab-tabungan" class="tab-content">
+        <div class="tabungan-cards">
+            <div class="card master-card">
+                <div class="card-label"><i class="fas fa-wallet"></i> Total Saldo Tabungan</div>
+                <div class="card-value" id="total-tabungan-view">Rp 0</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="card" style="border-left: 4px solid var(--primary); padding: 15px;">
+                    <div class="card-label" style="font-size: 10px;">Rek. Utama</div>
+                    <div class="card-value" id="saldo-utama" style="font-size: 16px;">Rp 0</div>
+                    <div style="position: absolute; right: 10px; top: 10px; color: var(--accent); cursor: pointer;" onclick="openAwalModal('Utama')">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--secondary); padding: 15px;">
+                    <div class="card-label" style="font-size: 10px;">Rek. Harian (Gaji)</div>
+                    <div class="card-value" id="saldo-harian" style="font-size: 16px;">Rp 0</div>
+                    <div style="position: absolute; right: 10px; top: 10px; color: var(--accent); cursor: pointer;" onclick="openGajiModal()">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Riwayat Transaksi</div>
+        </div>
+        
+        <div class="list-container" id="list-tabungan"></div>
+
+        <div class="fab-container">
+            <button class="btn-grand" onclick="openTransaksiModal()">
+                <i class="fas fa-plus"></i> Tambah Transaksi
+            </button>
+        </div>
+    </div>
+
+    <div id="tab-transaksi" class="tab-content hidden">
+        <div class="atm-dashboard">
+            <div class="card master-card">
+                <div class="card-label"><i class="fas fa-satellite-dish"></i> Total Aset Mini ATM</div>
+                <div class="card-value" id="total-atm-view">Rp 0</div>
+                <div style="font-size: 11px; color: #888; margin-top: 5px;">(Modal + Keuntungan)</div>
+            </div>
+
+            <div class="card atm-card-main">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div class="card-label">Saldo Aplikasi (Modal)</div>
+                        <div class="card-value" id="atm-modal-view">Rp 0</div>
+                    </div>
+                    <button class="btn-text" onclick="openInputModalModal()"><i class="fas fa-edit"></i> Edit Modal</button>
+                </div>
+            </div>
+            
+            <div class="card atm-card-cuan">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div class="card-label">Dompet Keuntungan</div>
+                        <div class="card-value cuan" id="atm-cuan-view">Rp 0</div>
+                    </div>
+                    <button class="btn-setor" onclick="openSetorCuanModal()"><i class="fas fa-hand-holding-usd"></i> Setor Cuan</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Jurnal Mini ATM</div>
+        </div>
+        
+        <div class="list-container" id="list-miniatm"></div>
+
+        <div class="fab-container">
+            <button class="btn-grand" onclick="openMiniAtmModal()">
+                <i class="fas fa-cash-register"></i> Catat Trx ATM
+            </button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" id="nav-tabungan" onclick="switchTab('tabungan')">
+            <i class="fas fa-wallet"></i> Tabungan
+        </div>
+        <div class="nav-item" id="nav-transaksi" onclick="switchTab('transaksi')">
+            <i class="fas fa-satellite-dish"></i> Mini ATM
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-setor-cuan">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Setor Keuntungan</div>
+                <i class="fas fa-times close-modal" onclick="closeModal('modal-setor-cuan')"></i>
+            </div>
+            <div class="form-group" style="text-align: center; margin-bottom: 20px;">
+                <label>Total Keuntungan Tersedia</label>
+                <div style="font-size: 24px; font-weight: bold; color: var(--success);" id="max-cuan-view">Rp 0</div>
+                <input type="hidden" id="max-cuan-val">
+            </div>
+            <div class="form-group">
+                <label>Nominal Setor</label>
+                <input type="text" id="setor-cuan-nominal" class="form-input rupiah-input" placeholder="0" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label>Setor Ke Rekening</label>
+                <div class="custom-select-wrapper">
+                    <div class="select-trigger placeholder" id="setor-rek-trigger" onclick="toggleCustomSelect('setor-rek-opts')">
+                        Pilih Rekening
+                    </div>
+                    <div class="select-options upward" id="setor-rek-opts">
+                        <div class="select-option" onclick="setCustomSelect('setor-rek', 'Utama', 'Rekening Utama')">Rekening Utama</div>
+                        <div class="select-option" onclick="setCustomSelect('setor-rek', 'Harian', 'Rekening Harian')">Rekening Harian</div>
+                    </div>
+                    <input type="hidden" id="setor-rek">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-submit" onclick="saveSetorCuan()">Setor Sekarang</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-awal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Set Saldo (<span id="set-rek-nama"></span>)</div>
+                <i class="fas fa-times close-modal" onclick="closeModal('modal-awal')"></i>
+            </div>
+            <input type="hidden" id="awal-target-rek">
+            <div class="form-group">
+                <label>Nominal Saldo Saat Ini</label>
+                <input type="text" id="awal-nominal" class="form-input rupiah-input" placeholder="Contoh: 5.000.000" inputmode="numeric">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-submit" onclick="saveSaldoAwal()">Simpan Saldo</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-gaji">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Input Gaji Harian</div>
+                <i class="fas fa-times close-modal" onclick="closeModal('modal-gaji')"></i>
+            </div>
+            <div class="form-group">
+                <label>Nominal Gaji</label>
+                <input type="text" id="gaji-nominal" class="form-input rupiah-input" value="30.000" readonly style="background:#f5f5f5; color:#888;">
+            </div>
+            <div class="form-group">
+                <label>Pilih Tanggal (Bulan & Tahun Otomatis)</label>
+                <input type="number" id="gaji-tgl" class="form-input" min="1" max="31" placeholder="Tgl 1 - 31" inputmode="numeric">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-submit" onclick="saveGajiHarian()">Klaim Gaji</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-transaksi">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="trx-modal-title">Tambah Transaksi</div>
+                <i class="fas fa-times close-modal" onclick="closeModal('modal-transaksi')"></i>
+            </div>
+            <input type="hidden" id="trx-id"> 
+            
+            <div class="row-2">
+                <div class="form-group">
+                    <label>Jenis Transaksi</label>
+                    <div class="custom-select-wrapper">
+                        <div class="select-trigger" id="trx-jenis-trigger" onclick="toggleCustomSelect('trx-jenis-opts')">
+                            Pengeluaran
+                        </div>
+                        <div class="select-options" id="trx-jenis-opts">
+                            <div class="select-option" onclick="setCustomSelect('trx-jenis', 'out', 'Pengeluaran')">Pengeluaran</div>
+                            <div class="select-option" onclick="setCustomSelect('trx-jenis', 'in', 'Pemasukan')">Pemasukan</div>
+                        </div>
+                        <input type="hidden" id="trx-jenis" value="out">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="date" id="trx-date" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nominal</label>
+                <input type="text" id="trx-nominal" class="form-input rupiah-input" placeholder="0" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label>Keterangan</label>
+                <input type="text" id="trx-ket" class="form-input" placeholder="Beli bakso, listrik, dll">
+            </div>
+            
+            <div class="form-group">
+                <label>Rekening Sumber/Tujuan</label>
+                <div class="custom-select-wrapper">
+                    <div class="select-trigger placeholder" id="trx-rek-trigger" onclick="toggleCustomSelect('trx-rek-opts')">
+                        Pilih Rekening
+                    </div>
+                    <div class="select-options upward" id="trx-rek-opts">
+                        <div class="select-option" onclick="setCustomSelect('trx-rek', 'Utama', 'Rekening Utama')">Rekening Utama</div>
+                        <div class="select-option" onclick="setCustomSelect('trx-rek', 'Harian', 'Rekening Harian')">Rekening Harian</div>
+                    </div>
+                    <input type="hidden" id="trx-rek">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-submit" onclick="saveTransaksi()">Simpan Transaksi</button>
+                <button class="btn-cancel hidden" id="btn-delete-trx" onclick="prepDeleteTrx()">Hapus Transaksi</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-atm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Set Saldo Aplikasi</div>
+                <i class="fas fa-times close-modal" onclick="closeModal('modal-atm-modal')"></i>
+            </div>
+            <div class="form-group">
+                <label>Total Saldo Aplikasi Saat Ini</label>
+                <input type="text" id="atm-modal-input" class="form-input rupiah-input" placeholder="Contoh: 10.000.000" inputmode="numeric">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-submit" onclick="saveAtmModal()">Simpan Modal</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-miniatm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Catat Transaksi ATM</div>
+                <i class="fas fa-times close-modal" onclick="closeModal('modal-miniatm')"></i>
+            </div>
+            
+            <div class="row-2">
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="date" id="atm-trx-date" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Keterangan / Tujuan</label>
+                    <div class="custom-select-wrapper">
+                        <input type="text" id="atm-trx-ket" class="form-input" placeholder="Ketik / Pilih..." autocomplete="off" style="padding-right: 35px;" onclick="toggleCustomSelect('atm-ket-opts')">
+                        <i class="fas fa-chevron-down" style="position: absolute; right: 15px; top: 15px; color: #aaa; pointer-events: none;"></i>
+                        
+                        <div class="select-options" id="atm-ket-opts" style="max-height: 180px;">
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Tarik Tunai', 'atm-ket-opts')">Tarik Tunai</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Transfer', 'atm-ket-opts')">Transfer</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Top Up Dana', 'atm-ket-opts')">Top Up Dana</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Top Up Gopay', 'atm-ket-opts')">Top Up Gopay</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Top Up ShopeePay', 'atm-ket-opts')">Top Up ShopeePay</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Top Up Link Aja', 'atm-ket-opts')">Top Up Link Aja</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Top Up OVO', 'atm-ket-opts')">Top Up OVO</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'QRIS Bayar', 'atm-ket-opts')">QRIS Bayar</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Paket Data', 'atm-ket-opts')">Paket Data</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Pulsa', 'atm-ket-opts')">Pulsa</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Token PLN', 'atm-ket-opts')">Token PLN</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Tagihan PLN', 'atm-ket-opts')">Tagihan PLN</div>
+                            <div class="select-option" onclick="setComboboxValue('atm-trx-ket', 'Internet', 'atm-ket-opts')">Internet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Efek Ke Saldo Aplikasi Kamu</label>
+                <div class="custom-select-wrapper">
+                    <div class="select-trigger placeholder" id="atm-trx-tipe-trigger" onclick="toggleCustomSelect('atm-trx-tipe-opts')" style="background: #f9f9f9;">
+                        Pilih Mutasi Saldo...
+                    </div>
+                    <div class="select-options" id="atm-trx-tipe-opts">
+                        <div class="select-option" onclick="setCustomSelect('atm-trx-tipe', 'in', 'Saldo Aplikasi Bertambah (+)')">Saldo Aplikasi Bertambah (+)</div>
+                        <div class="select-option" onclick="setCustomSelect('atm-trx-tipe', 'out', 'Saldo Aplikasi Berkurang (-)')">Saldo Aplikasi Berkurang (-)</div>
+                    </div>
+                    <input type="hidden" id="atm-trx-tipe">
+                </div>
+            </div>
+
+            <div class="row-2">
+                <div class="form-group">
+                    <label>Nominal Trx</label>
+                    <input type="text" id="atm-trx-nominal" class="form-input rupiah-input" placeholder="0" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label>Cuan (Fee)</label>
+                    <input type="text" id="atm-trx-cuan" class="form-input rupiah-input" placeholder="5.000" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-submit" onclick="saveMiniAtmTrx()">Simpan Transaksi</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dialog-overlay" id="dialog-confirm">
+        <div class="dialog-content">
+            <i class="fas fa-exclamation-triangle dialog-icon confirm"></i>
+            <div class="dialog-title">Konfirmasi</div>
+            <div class="dialog-msg" id="confirm-msg">Apakah Anda yakin?</div>
+            <div class="dialog-btns">
+                <button class="btn-dialog secondary" onclick="closeDialog('dialog-confirm')">Batal</button>
+                <button class="btn-dialog primary" id="confirm-yes-btn">Ya, Lanjut</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dialog-overlay" id="dialog-alert">
+        <div class="dialog-content">
+            <i class="fas fa-check-circle dialog-icon success"></i>
+            <div class="dialog-title">Berhasil</div>
+            <div class="dialog-msg" id="alert-msg">Data telah disimpan.</div>
+            <button class="btn-dialog primary" style="width:100%" onclick="closeDialog('dialog-alert')">Oke, Siap</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const STORAGE_KEY = 'mycash_v3_data';
+    
+    let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+        rekening: { Utama: 0, Harian: 0 },
+        atm: { modal: 0 },
+        transaksi: [], 
+        jurnalAtm: []  
+    };
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        renderUI();
+    }
+
+    const formatRp = (num) => 'Rp ' + parseInt(num).toLocaleString('id-ID');
+    const getRawInt = (str) => {
+        if (!str) return 0;
+        return parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
+    };
+    const getTodayIso = () => new Date().toISOString().split('T')[0];
+    const sortByDateDesc = (a, b) => new Date(b.tgl) - new Date(a.tgl);
+
+    document.querySelectorAll('.rupiah-input').forEach(input => {
+        input.addEventListener('input', function(e) {
+            let val = e.target.value.replace(/[^0-9]/g, '');
+            if (val) {
+                e.target.value = parseInt(val).toLocaleString('id-ID');
+            } else {
+                e.target.value = '';
+            }
+        });
+    });
+
+    // --- LOGIKA UTAMA RENDER UI ---
+    function renderUI() {
+        let balUtama = appData.rekening.Utama;
+        let balHarian = appData.rekening.Harian;
+
+        // Hitung transaksi biasa
+        appData.transaksi.forEach(t => {
+            const amt = parseInt(t.nominal);
+            if (t.rek === 'Utama') balUtama += (t.jenis === 'in' ? amt : -amt);
+            if (t.rek === 'Harian') balHarian += (t.jenis === 'in' ? amt : -amt);
+        });
+
+        let totalCuan = 0;
+        let totalCuanDisetor = 0;
+        let atmModal = appData.atm.modal;
+        
+        // Hitung mutasi ATM
+        appData.jurnalAtm.forEach(j => {
+            totalCuan += parseInt(j.cuan);
+            let tipeMutasi = j.tipe || 'out';
+            if (tipeMutasi === 'in') {
+                atmModal += parseInt(j.nominal);
+            } else {
+                atmModal -= parseInt(j.nominal);
+            }
+        });
+
+        // Hitung cuan yang ditarik
+        appData.transaksi.forEach(t => {
+            if (t.isSetorCuan) {
+                totalCuanDisetor += parseInt(t.nominal);
+            }
+        });
+
+        let sisaCuan = totalCuan - totalCuanDisetor;
+        document.getElementById('max-cuan-val').value = sisaCuan;
+
+        // GRAND TOTAL CALCULATIONS
+        let totalTabungan = balUtama + balHarian;
+        let totalAsetAtm = atmModal + sisaCuan;
+
+        // Render Angka ke HTML
+        document.getElementById('total-tabungan-view').innerText = formatRp(totalTabungan);
+        document.getElementById('total-atm-view').innerText = formatRp(totalAsetAtm);
+        document.getElementById('saldo-utama').innerText = formatRp(balUtama);
+        document.getElementById('saldo-harian').innerText = formatRp(balHarian);
+        document.getElementById('atm-modal-view').innerText = formatRp(atmModal);
+        document.getElementById('atm-cuan-view').innerText = formatRp(sisaCuan);
+
+        // Render List Tabungan
+        const listTabungan = document.getElementById('list-tabungan');
+        listTabungan.innerHTML = '';
+        if (appData.transaksi.length === 0) {
+            listTabungan.innerHTML = '<div style="text-align:center; color:#bbb; padding:20px; font-size:13px;">Belum ada transaksi.</div>';
+        } else {
+            [...appData.transaksi].sort(sortByDateDesc).forEach(t => {
+                let badgeStyle = t.isSetorCuan ? 'background:#e8f8f5; color:var(--success); font-weight:bold;' : '';
+                listTabungan.innerHTML += `
+                    <div class="list-item" style="${t.isSetorCuan ? 'border-left: 3px solid var(--success);' : ''}">
+                        <div class="item-info">
+                            <h4>${t.ket}</h4>
+                            <p>${new Date(t.tgl).toLocaleDateString('id-ID', {day:'numeric', month:'short'})}</p>
+                            <div class="item-meta" style="${badgeStyle}"><i class="fas fa-landmark"></i> ${t.rek}</div>
+                        </div>
+                        <div class="item-right">
+                            <div class="item-amount ${t.jenis}">${t.jenis === 'in' ? '+' : '-'}${formatRp(t.nominal)}</div>
+                            <div class="item-actions">
+                                ${!t.isSetorCuan ? `<i class="fas fa-pencil-alt" onclick="openEditTransaksi('${t.id}')"></i>` : ''}
+                                <i class="fas fa-trash" onclick="askDeleteTrx('${t.id}')"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Render List Mini ATM
+        const listAtm = document.getElementById('list-miniatm');
+        listAtm.innerHTML = '';
+        if (appData.jurnalAtm.length === 0) {
+            listAtm.innerHTML = '<div style="text-align:center; color:#bbb; padding:20px; font-size:13px;">Belum ada jurnal ATM.</div>';
+        } else {
+            [...appData.jurnalAtm].sort(sortByDateDesc).forEach(j => {
+                let isNambah = j.tipe === 'in';
+                let iconMutasi = isNambah ? '<i class="fas fa-plus-circle" style="color:var(--success)"></i> Saldo Apl Naik' : '<i class="fas fa-minus-circle" style="color:var(--danger)"></i> Saldo Apl Turun';
+                let badgeColor = isNambah ? 'background:#e8f8f5; color:var(--success);' : 'background:#fdedec; color:var(--danger);';
+                
+                listAtm.innerHTML += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <h4>${j.ket}</h4>
+                            <p>${new Date(j.tgl).toLocaleDateString('id-ID', {day:'numeric', month:'short'})}</p>
+                            <p style="font-size:11px; color:var(--primary); margin-top:2px;">Nominal Trx: ${formatRp(j.nominal)}</p>
+                            <div class="item-meta" style="${badgeColor}">${iconMutasi}</div>
+                        </div>
+                        <div class="item-right">
+                            <div class="item-amount in" style="font-size:13px;"><span style="font-size:10px; color:#888;">Cuan</span> <br>+${formatRp(j.cuan)}</div>
+                            <div class="item-actions" style="margin-top:10px;">
+                                <i class="fas fa-trash" onclick="askDeleteAtmJurnal('${j.id}')"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        document.getElementById(`nav-${tabName}`).classList.add('active');
+        
+        document.getElementById('greeting').innerText = tabName === 'tabungan' ? 'Kelola keuanganmu dengan cerdas' : 'Pantau aset usahamu di sini';
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); resetForms(); }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) { event.target.classList.remove('open'); resetForms(); }
+        if (!event.target.closest('.custom-select-wrapper')) {
+            document.querySelectorAll('.select-options').forEach(el => el.style.display = 'none');
+        }
+    }
+
+    function toggleCustomSelect(optionsId) {
+        const optionsTrig = document.getElementById(optionsId);
+        const isVisible = optionsTrig.style.display === 'block';
+        document.querySelectorAll('.select-options').forEach(el => el.style.display = 'none');
+        optionsTrig.style.display = isVisible ? 'none' : 'block';
+    }
+
+    function setCustomSelect(inputId, value, label) {
+        document.getElementById(inputId).value = value;
+        const trigger = document.getElementById(inputId + '-trigger');
+        trigger.innerText = label;
+        trigger.classList.remove('placeholder');
+        document.getElementById(inputId + '-opts').style.display = 'none';
+        
+        trigger.style.background = '#fff';
+        trigger.style.borderColor = 'var(--secondary)';
+    }
+
+    function setComboboxValue(inputId, value, optionsId) {
+        document.getElementById(inputId).value = value;
+        document.getElementById(optionsId).style.display = 'none';
+
+        if (inputId === 'atm-trx-ket') {
+            if (value.toLowerCase().includes('tarik tunai')) {
+                setCustomSelect('atm-trx-tipe', 'in', 'Saldo Aplikasi Bertambah (+)');
+            } else {
+                setCustomSelect('atm-trx-tipe', 'out', 'Saldo Aplikasi Berkurang (-)');
+            }
+        }
+    }
+
+    function resetForms() {
+        document.getElementById('trx-modal-title').innerText = 'Tambah Transaksi';
+        document.getElementById('btn-delete-trx').classList.add('hidden');
+        
+        document.querySelectorAll('.form-input').forEach(input => {
+            if(input.id !== 'gaji-nominal') input.value = '';
+        });
+        
+        document.getElementById('trx-date').value = getTodayIso();
+        document.getElementById('atm-trx-date').value = getTodayIso();
+        
+        ['trx-rek', 'setor-rek', 'atm-trx-tipe'].forEach(id => {
+            const trigger = document.getElementById(id + '-trigger');
+            if(trigger) {
+                trigger.innerText = 'Pilih...';
+                trigger.classList.add('placeholder');
+                trigger.style.borderColor = 'var(--light-gray)';
+            }
+            const input = document.getElementById(id);
+            if(input) input.value = '';
+        });
+
+        document.getElementById('trx-jenis-trigger').innerText = 'Pengeluaran';
+        document.getElementById('trx-jenis-trigger').classList.remove('placeholder');
+        document.getElementById('trx-jenis').value = 'out';
+        
+        document.querySelectorAll('.select-options').forEach(el => el.style.display = 'none');
+    }
+
+    function showAlert(msg) { document.getElementById('alert-msg').innerText = msg; document.getElementById('dialog-alert').classList.add('open'); }
+    function closeDialog(id) { document.getElementById(id).classList.remove('open'); }
+
+    let confirmCallback = null;
+    function showConfirm(msg, callback) {
+        document.getElementById('confirm-msg').innerText = msg;
+        confirmCallback = callback;
+        document.getElementById('dialog-confirm').classList.add('open');
+    }
+    document.getElementById('confirm-yes-btn').onclick = function() { if (confirmCallback) confirmCallback(); closeDialog('dialog-confirm'); };
+
+    // --- FUNGSI SETOR CUAN ---
+    function openSetorCuanModal() {
+        resetForms();
+        let maxCuan = parseInt(document.getElementById('max-cuan-val').value) || 0;
+        if (maxCuan <= 0) return showAlert('Sabar, belum ada keuntungan nganggur yang bisa ditarik nih.');
+        
+        document.getElementById('max-cuan-view').innerText = formatRp(maxCuan);
+        document.getElementById('setor-cuan-nominal').value = maxCuan.toLocaleString('id-ID');
+        openModal('modal-setor-cuan');
+    }
+
+    function saveSetorCuan() {
+        const nominal = getRawInt(document.getElementById('setor-cuan-nominal').value);
+        const maxCuan = parseInt(document.getElementById('max-cuan-val').value) || 0;
+        const rek = document.getElementById('setor-rek').value;
+
+        if (!rek || nominal <= 0) return showAlert('Pilih rekening tujuan dan isikan nominal setornya dong.');
+        if (nominal > maxCuan) return showAlert('Nominalnya kegedean woy, cuan kamu sisa ' + formatRp(maxCuan));
+
+        appData.transaksi.push({
+            id: 'setor_' + Date.now(),
+            tgl: getTodayIso(),
+            jenis: 'in',
+            nominal: nominal,
+            ket: 'Setoran Cuan ATM',
+            rek: rek,
+            isSetorCuan: true
+        });
+
+        saveData();
+        closeModal('modal-setor-cuan');
+        showAlert(`Asyikk! Cuan ${formatRp(nominal)} berhasil dipindah ke Tabungan ${rek}.`);
+    }
+
+    // --- FUNGSI LAINNYA ---
+    function openAwalModal(rek) {
+        document.getElementById('set-rek-nama').innerText = rek;
+        document.getElementById('awal-target-rek').value = rek;
+        document.getElementById('awal-nominal').value = parseInt(appData.rekening[rek]).toLocaleString('id-ID');
+        openModal('modal-awal');
+    }
+
+    function saveSaldoAwal() {
+        const rek = document.getElementById('awal-target-rek').value;
+        const nominal = getRawInt(document.getElementById('awal-nominal').value);
+        if (nominal < 0 || isNaN(nominal)) return showAlert('Masukkan nominal yang bener dong.');
+        appData.rekening[rek] = nominal;
+        saveData();
+        closeModal('modal-awal');
+        showAlert(`Saldo awal ${rek} berhasil diset.`);
+    }
+
+    function openGajiModal() { resetForms(); document.getElementById('gaji-nominal').value = '30.000'; openModal('modal-gaji'); }
+
+    function saveGajiHarian() {
+        const tgl = document.getElementById('gaji-tgl').value;
+        if (!tgl || tgl < 1 || tgl > 31) return showAlert('Tanggalnya isi yang bener (1-31) ya.');
+        const fullDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(tgl).padStart(2, '0')}`;
+        const nominal = getRawInt(document.getElementById('gaji-nominal').value);
+
+        appData.transaksi.push({ id: 'gj_' + Date.now(), tgl: fullDate, jenis: 'in', nominal: nominal, ket: 'Gaji Harian', rek: 'Harian' });
+        saveData(); closeModal('modal-gaji'); showAlert('Gaji harian berhasil masuk!');
+    }
+
+    function openTransaksiModal() { resetForms(); document.getElementById('trx-modal-title').innerText = 'Tambah Transaksi'; openModal('modal-transaksi'); }
+
+    function openEditTransaksi(id) {
+        resetForms();
+        const t = appData.transaksi.find(x => x.id === id);
+        if (!t) return;
+        document.getElementById('trx-modal-title').innerText = 'Edit Transaksi';
+        document.getElementById('btn-delete-trx').classList.remove('hidden');
+        document.getElementById('trx-id').value = t.id;
+        document.getElementById('trx-date').value = t.tgl;
+        document.getElementById('trx-nominal').value = parseInt(t.nominal).toLocaleString('id-ID');
+        document.getElementById('trx-ket').value = t.ket;
+        setCustomSelect('trx-jenis', t.jenis, t.jenis === 'in' ? 'Pemasukan' : 'Pengeluaran');
+        setCustomSelect('trx-rek', t.rek, 'Rekening ' + t.rek);
+        openModal('modal-transaksi');
+    }
+
+    function saveTransaksi() {
+        const id = document.getElementById('trx-id').value;
+        const jenis = document.getElementById('trx-jenis').value;
+        const tgl = document.getElementById('trx-date').value;
+        const nominal = getRawInt(document.getElementById('trx-nominal').value);
+        const ket = document.getElementById('trx-ket').value;
+        const rek = document.getElementById('trx-rek').value;
+
+        if (!tgl || nominal <= 0 || !ket || !rek) return showAlert('Datanya dilengkapi dulu bosku.');
+
+        if (id) {
+            showConfirm('Simpan perubahan transaksi ini?', function() {
+                const idx = appData.transaksi.findIndex(x => x.id === id);
+                if (idx !== -1) { appData.transaksi[idx] = { id, tgl, jenis, nominal, ket, rek }; saveData(); closeModal('modal-transaksi'); showAlert('Udah diedit ya.'); }
+            });
+        } else {
+            appData.transaksi.push({ id: 'trx_' + Date.now(), tgl, jenis, nominal, ket, rek });
+            saveData(); closeModal('modal-transaksi'); showAlert('Transaksi dicatat.');
+        }
+    }
+
+    let trxIdToDelete = null;
+    function askDeleteTrx(id) {
+        trxIdToDelete = id;
+        showConfirm('Beneran mau hapus rekapan ini? Saldonya bakal menyesuaikan lagi loh.', function() {
+            appData.transaksi = appData.transaksi.filter(x => x.id !== trxIdToDelete);
+            saveData(); trxIdToDelete = null; showAlert('Data dibersihkan.');
+        });
+    }
+    function prepDeleteTrx() { const id = document.getElementById('trx-id').value; closeModal('modal-transaksi'); askDeleteTrx(id); }
+
+    function openInputModalModal() {
+        document.getElementById('atm-modal-input').value = parseInt(appData.atm.modal).toLocaleString('id-ID');
+        openModal('modal-atm-modal');
+    }
+
+    function saveAtmModal() {
+        const modal = getRawInt(document.getElementById('atm-modal-input').value);
+        if (modal < 0 || isNaN(modal)) return showAlert('Nominal saldonya isi yang bener ya.');
+        appData.atm.modal = modal; saveData(); closeModal('modal-atm-modal'); showAlert('Saldo aplikasi udah diupdate.');
+    }
+
+    function openMiniAtmModal() { resetForms(); openModal('modal-miniatm'); }
+
+    function saveMiniAtmTrx() {
+        const tgl = document.getElementById('atm-trx-date').value;
+        const ket = document.getElementById('atm-trx-ket').value;
+        const tipe = document.getElementById('atm-trx-tipe').value;
+        const nominal = getRawInt(document.getElementById('atm-trx-nominal').value); 
+        const cuan = getRawInt(document.getElementById('atm-trx-cuan').value);
+
+        if (!tgl || !ket || !tipe || nominal <= 0 || isNaN(cuan)) return showAlert('Eits, isi lengkap dulu datanya biar saldomu nggak selisih ntar.');
+
+        appData.jurnalAtm.push({ id: 'atm_' + Date.now(), tgl, ket, tipe, nominal, cuan });
+        saveData(); closeModal('modal-miniatm'); showAlert('Sip! Transaksi sama cuan udah kecatat.');
+    }
+
+    function askDeleteAtmJurnal(id) {
+        showConfirm('Yakin mau hapus transaksi ATM ini? Saldo sama Cuan kamu bakal dikurangi otomatis.', function() {
+            appData.jurnalAtm = appData.jurnalAtm.filter(x => x.id !== id);
+            saveData(); showAlert('Jurnal ATM dihapus.');
+        });
+    }
+
+    // --- INIT ---
+    document.getElementById('trx-date').value = getTodayIso();
+    document.getElementById('atm-trx-date').value = getTodayIso();
+    renderUI();
+
+</script>
+</body>
+</html>
